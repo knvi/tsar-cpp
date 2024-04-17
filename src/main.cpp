@@ -212,7 +212,16 @@ public:
             if (cde == 401 && data["message"] == "Subscription not found") {
                 std::cout << "Subscription not found. Please re-run this command once you authenticate.\n";
                 std::string url = "https://tsar.cc/auth/" + this->app_id + "/" + hwid;
+                #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
+                system(("start " + url).c_str());
+
+                #elif defined(__linux__) || defined(__unix__)
                 system(("xdg-open " + url).c_str());
+
+                #elif defined(__APPLE__) && defined(__MACH__)
+                system(("open " + url).c_str());
+
+                #endif
 
                 exit(1);
             }
