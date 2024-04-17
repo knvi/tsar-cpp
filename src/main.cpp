@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <base.hpp>
 #include <iostream>
+#include <obfy.hpp>
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 #include <windows.h>
@@ -143,11 +144,17 @@ Data string_to_data(const std::string &json_string)
     Data data;
 
     data.user.id = json["user"]["id"];
-    data.user.username = json["user"]["username"];
-    data.user.avatar = json["user"]["avatar"];
+    if (json["user"]["username"] != nullptr) {
+        data.user.username = json["user"]["username"];
+    }    
+    if (json["user"]["avatar"] != nullptr) {
+        data.user.avatar = json["user"]["avatar"];
+    }
 
     data.subscription.id = json["subscription"]["id"];
-    data.subscription.expires = json["subscription"]["expires"];
+    if (json["subscription"]["expires"] != nullptr) {
+        data.subscription.expires = json["subscription"]["expires"];
+    }
 
     data.timestamp = json["timestamp"];
     data.hwid = json["hwid"];
@@ -166,7 +173,6 @@ public:
     Data authenticate_user()
     {
         std::string hwid = get_hwid();
-        std::cout << "hwid = " << hwid << "\n";
         return validate_user(hwid);
     }
 
@@ -198,13 +204,18 @@ public:
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
             CURLcode code = curl_easy_perform(curl);
-            std::cout << "url " << url << ", code " << int(code) << "\n";
-            if (code != CURLE_OK)
-                std::cout << "not ok;";
-
-            std::cout << "response = " << response << "\n";
+            int cde;
+            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &cde);
 
             nlohmann::json data = nlohmann::json::parse(response);
+
+            if (cde == 401 && data["message"] == "Subscription not found") {
+                std::cout << "Subscription not found. Please re-run this command once you authenticate.\n";
+                std::string url = "https://tsar.cc/auth/" + this->app_id + "/" + hwid;
+                system(("xdg-open " + url).c_str());
+
+                exit(1);
+            }
 
             std::string base64_data = data["data"];
             std::string signature = data["signature"];
@@ -214,14 +225,14 @@ public:
 
             std::string json_string = data_bytes_to_string(decoded_data);
 
-            std::cout << "json_string = " << json_string << "\n";
-
             Data json = string_to_data(json_string);
 
             bool result = verify_signature(pub_key, json_string, decoded_signature);
 
             if (!result)
             {
+                return json;
+            } else {
                 return Data();
             }
         }
@@ -230,12 +241,12 @@ public:
 
 int main()
 {
-    std::string appId = "58816206-b24c-41d4-a594-8500746a78ee";
-    std::string publicKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5CnFUF4qSGfrLN84Dlo8zMgRjnCLRlCP+ddg6XgDFfvIhC+4w+frn0doqohQo0Y71TXK2fqbrD0FgFtc6N+XXQ==";
+    std::string appId = "9654e365-003c-4044-9620-548d0692410b";
+    std::string publicKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExqFKMC375sH2Y6wJ93buRNTk/T4pUXxBb3q4g6azD3PpeUmrnVZVN336CoLDtokhrsJ1SxPj6fGzE3YGkvHQ0Q==";
 
     Client client(appId, publicKey);
 
     Data data = client.authenticate_user();
-    std::cout << "data[\"user\"][\"name\"] = " << data.user.username << "\n";
+    std::cout << "data[\"user\"][\"id\"] = " << data.user.id << "\n";
     return 0;
 }
