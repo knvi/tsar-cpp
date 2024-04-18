@@ -277,12 +277,8 @@ CMakeFiles/TSAR_CPP.dir/src/main.cpp.o: /root/code/tsar-cpp/src/main.cpp \
  /usr/include/c++/11/bits/locale_facets_nonio.tcc \
  /usr/include/c++/11/bits/locale_conv.h \
  /usr/include/c++/11/bits/quoted_string.h /usr/include/c++/11/sstream \
- /usr/include/c++/11/bits/sstream.tcc \
- /root/code/tsar-cpp/include/base.hpp /usr/include/c++/11/iostream \
- /root/code/tsar-cpp/include/obfy.hpp /usr/include/c++/11/random \
- /usr/include/c++/11/bits/random.h \
- /usr/include/x86_64-linux-gnu/c++/11/bits/opt_random.h \
- /usr/include/c++/11/bits/random.tcc /usr/include/c++/11/fstream \
+ /usr/include/c++/11/bits/sstream.tcc /usr/include/c++/11/iostream \
+ /usr/include/c++/11/fstream \
  /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
  /usr/include/c++/11/bits/fstream.tcc

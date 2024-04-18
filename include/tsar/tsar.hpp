@@ -378,7 +378,7 @@ public:
            << "&hwid=" << this->hwid;
         std::string url = ss.str();
 
-        std::cout << "URL: " << url << "\n";
+        // std::cout << "URL: " << url << "\n";
 
         std::string response;
         int response_code;
