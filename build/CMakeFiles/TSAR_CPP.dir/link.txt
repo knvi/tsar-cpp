@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/TSAR_CPP.dir/src/main.cpp.o -o TSAR_CPP  /usr/lib/x86_64-linux-gnu/libcurl.so /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libcrypto.so 
+/usr/bin/c++  -D_FORTIFY_SOURCE=2 -fstack-protector -Wall CMakeFiles/TSAR_CPP.dir/src/main.cpp.o -o TSAR_CPP  /usr/lib/x86_64-linux-gnu/libcurl.so /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libcrypto.so 

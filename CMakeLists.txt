@@ -18,3 +18,8 @@ target_link_libraries(TSAR_CPP CURL::libcurl)
 # openssl
 find_package(OpenSSL REQUIRED)
 target_link_libraries(TSAR_CPP OpenSSL::SSL OpenSSL::Crypto)
+
+# -D_FORTIFY_SOURCE=2
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_FORTIFY_SOURCE=2 -fstack-protector -Wall")
+
+# -fsanitize=cfi

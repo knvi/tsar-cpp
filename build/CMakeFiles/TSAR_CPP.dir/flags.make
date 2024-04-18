@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/root/code/tsar-cpp/include
 
-CXX_FLAGS = -std=gnu++14
+CXX_FLAGS =  -D_FORTIFY_SOURCE=2 -fstack-protector -Wall -std=gnu++14
 
