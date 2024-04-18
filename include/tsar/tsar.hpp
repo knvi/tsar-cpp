@@ -403,7 +403,7 @@ public:
 
             std::string json_string = data_bytes_to_string(decoded_data);
 
-            if (validate_result(json_string, decoded_signature, pub_key) == 0)
+            if (validate_result(json_string, decoded_signature, pub_key) != 0)
             {
                 std::cout << "Failed to validate result\n";
                 return Data();
