@@ -9,6 +9,8 @@ requires the nlohmann/json header to be in your include path of the project.
 
 The src/main.cpp file is made for testing the library.
 
+To use the client, put `include/tsar/tsar.hpp` file into your include path.
+
 to build
 ```
 mkdir build && cd build
