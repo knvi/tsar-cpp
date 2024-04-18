@@ -197,6 +197,7 @@ int validate_result(const std::string &response, const std::string &signature, E
 
 /// ---!!! STRUCTS !!!---
 
+/// User object
 typedef struct User
 {
     std::string id;
@@ -204,6 +205,7 @@ typedef struct User
     std::string avatar;
 } User;
 
+/// Subscription object
 typedef struct Subscription
 {
     std::string id;
@@ -211,6 +213,7 @@ typedef struct Subscription
     User user;
 } Subscription;
 
+/// Data returned by the server when fetching a subscription.
 typedef struct Data
 {
     Subscription subscription;
@@ -250,15 +253,24 @@ Data string_to_data(const std::string &json_string)
 
 /// ---!!! CLIENT !!!---
 
+/// The TSAR Client struct. Used to interact with the API after it's initialized.
 class Client
 {
 public:
+    /// The ID of your TSAR app. Should be in UUID format: 00000000-0000-0000-0000-000000000000
     std::string app_id;
+    /// The public decryption key for your TSAR app. Should be in base64 format.
     std::string client_key;
+    /// The HWID of the authenticated user.
     std::string hwid;
+    /// Client session is used to query the client API as a user.
     std::string session;
+    /// The subscription object of the user that authenticated.
     Subscription subscription;
 
+    /// @brief Construct a new Client object
+    /// @param app_id App id
+    /// @param client_key Client key
     Client(std::string &app_id, std::string &client_key) : app_id(app_id), client_key(client_key) {
         this->hwid = get_hwid();
 
@@ -275,12 +287,8 @@ public:
 
     }
 
-    static size_t write_callback(void *cnts, size_t size, size_t nmemb, void *userp)
-    {
-        ((std::string *)userp)->append((char *)cnts, size * nmemb);
-        return size * nmemb;
-    }
-
+    /// @brief Validate the user
+    /// @return Data - Data object containing the subscription and other information
     Data validate_user()
     {
         std::string pub_key_bytes = base64_decode(client_key);
@@ -329,6 +337,12 @@ public:
             std::cout << "Failed to get request\n";
             return Data();
         }
+    }
+private:
+    static size_t write_callback(void *cnts, size_t size, size_t nmemb, void *userp)
+    {
+        ((std::string *)userp)->append((char *)cnts, size * nmemb);
+        return size * nmemb;
     }
 };
 
