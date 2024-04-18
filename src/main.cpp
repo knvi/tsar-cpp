@@ -189,7 +189,7 @@ public:
         EVP_PKEY *pub_key = EVP_PKEY_new();
 
         std::stringstream ss;
-        ss << "https://tsar.cc/api/client/v1/subscriptions/validate?app=" << this->app_id
+        ss << "https://tsar.cc/api/client/subscriptions/get?app=" << this->app_id
            << "&hwid=" << hwid;
         std::string url = ss.str();
 
