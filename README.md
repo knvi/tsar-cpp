@@ -11,7 +11,7 @@ The src/main.cpp file is made for testing the library.
 
 To use the client, put `include/tsar/tsar.hpp` file into your include path.
 
-to build
+to build (the tests)
 ```
 mkdir build && cd build
 cmake ..
