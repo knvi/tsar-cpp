@@ -9,6 +9,13 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <unordered_map>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <time.h>
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 #include <windows.h>
@@ -28,14 +35,17 @@
 
 const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-std::string base64_encode(const std::string &input) {
+std::string base64_encode(const std::string &input)
+{
     std::string encoded;
     int i = 0, j = 0;
     unsigned char char_array_3[3], char_array_4[4];
 
-    for (const char &ch : input) {
+    for (const char &ch : input)
+    {
         char_array_3[i++] = ch;
-        if (i == 3) {
+        if (i == 3)
+        {
             char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
             char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
             char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
@@ -47,7 +57,8 @@ std::string base64_encode(const std::string &input) {
         }
     }
 
-    if (i) {
+    if (i)
+    {
         for (j = i; j < 3; j++)
             char_array_3[j] = '\0';
 
@@ -65,16 +76,19 @@ std::string base64_encode(const std::string &input) {
     return encoded;
 }
 
-std::string base64_decode(const std::string &input) {
+std::string base64_decode(const std::string &input)
+{
     std::string decoded;
     int i = 0, j = 0;
     unsigned char char_array_4[4], char_array_3[3];
 
-    for (const char &ch : input) {
-        if (ch == '=') 
+    for (const char &ch : input)
+    {
+        if (ch == '=')
             break;
         char_array_4[i++] = ch;
-        if (i == 4) {
+        if (i == 4)
+        {
             for (i = 0; i < 4; i++)
                 char_array_4[i] = base64_chars.find(char_array_4[i]);
 
@@ -88,7 +102,8 @@ std::string base64_decode(const std::string &input) {
         }
     }
 
-    if (i) {
+    if (i)
+    {
         for (j = i; j < 4; j++)
             char_array_4[j] = 0;
 
@@ -98,7 +113,7 @@ std::string base64_decode(const std::string &input) {
         char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
         char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
 
-        for (j = 0; j < i - 1; j++) 
+        for (j = 0; j < i - 1; j++)
             decoded += char_array_3[j];
     }
 
@@ -199,6 +214,45 @@ bool verify_signature(EVP_PKEY *pub_key, const std::string &data, const std::str
     EVP_MD_CTX_free(mdctx);
 
     return res == 1;
+}
+
+/// @brief Get the NTP time difference
+/// @return int - NTP time difference in seconds
+int get_ntp_diff()
+{
+    char *hostname = (char *)"200.20.186.76";
+    int portno = 123;                                      
+    int maxlen = 1024;                                     
+    int i;                                                 
+    unsigned char msg[48] = {010, 0, 0, 0, 0, 0, 0, 0, 0}; 
+    unsigned long buf[maxlen];                             
+
+    struct protoent *proto;
+    struct sockaddr_in server_addr;
+    int s;
+    long tmit;
+
+    proto = getprotobyname("udp");
+    s = socket(PF_INET, SOCK_DGRAM, proto->p_proto);
+
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr(hostname);
+    server_addr.sin_port = htons(portno);
+
+    i = sendto(s, msg, sizeof(msg), 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+    struct sockaddr saddr;
+    socklen_t saddr_l = sizeof(saddr);
+    i = recvfrom(s, buf, 48, 0, &saddr, &saddr_l);
+
+    tmit = ntohl((time_t)buf[4]);
+    tmit -= 2208988800U;
+
+    i = time(0);
+    time_t diff = i - tmit;
+
+    return abs(diff);
 }
 
 /// @brief Convert data bytes to string
@@ -349,7 +403,8 @@ public:
     /// @brief Construct a new Client object
     /// @param app_id App id
     /// @param client_key Client key
-    Client(std::string &app_id, std::string &client_key) : app_id(app_id), client_key(client_key) {
+    Client(std::string &app_id, std::string &client_key) : app_id(app_id), client_key(client_key)
+    {
         this->hwid = get_hwid();
 
         if (this->hwid.empty())
@@ -362,7 +417,6 @@ public:
 
         this->subscription = data.subscription;
         this->session = data.session;
-
     }
 
     /// @brief Validate the user
@@ -383,11 +437,13 @@ public:
         std::string response;
         int response_code;
 
-        if (get_request(url, response, write_callback, response_code) == 1) {
-            if (response_code == 401) {
+        if (get_request(url, response, write_callback, response_code) == 1)
+        {
+            if (response_code == 401)
+            {
                 std::cout << "Subscription not found. Please re-run this command once you authenticate.\n";
                 std::string url = "https://tsar.cc/auth/" + this->app_id + "/" + hwid;
-                
+
                 open_url(url);
 
                 exit(1);
@@ -409,13 +465,20 @@ public:
                 return Data();
             }
 
-            return string_to_data(json_string);
+            if (get_ntp_diff() > 1) {
+                std::cout << "Old request\n";
+                return Data();
+            } 
 
-        } else {
+            return string_to_data(json_string);
+        }
+        else
+        {
             std::cout << "Failed to get request\n";
             return Data();
         }
     }
+
 private:
     static size_t write_callback(void *cnts, size_t size, size_t nmemb, void *userp)
     {
