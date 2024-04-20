@@ -465,12 +465,16 @@ public:
                 return Data();
             }
 
-            if (get_ntp_diff() > 1) {
+            Data dataobj = string_to_data(json_string);
+
+            long long timestamp = dataobj.timestamp;
+            long long current_time = time(0);
+
+            if (timestamp < current_time || get_ntp_diff() > 1)
+            {
                 std::cout << "Old request\n";
                 return Data();
-            } 
-
-            return string_to_data(json_string);
+            }
         }
         else
         {
